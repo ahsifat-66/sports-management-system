@@ -1,191 +1,117 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include "schedule.h"
 #include "booking.h"
 
-void viewSchedule() {
+// Display already booked slots for a specific venue on a chosen date
+void showBookedSlots(const char* venueName, const char* date) {
     FILE *file = fopen("bookings.txt", "r");
-    if (!file) {
-        printf("\nNo bookings scheduled yet. Everything is open!\n");
-        return;
-    }
+    if (!file) return;
 
-    struct Booking b;
-    char buffer[50];
-    printf("\n--- Current Complex Schedule ---\n");
+    char line[200];
+    int found = 0;
 
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        b.bookingId = atoi(buffer);
+    printf("\n--- Booked Slots for '%s' on %s ---\n", venueName, date);
 
-        if (!fgets(b.customerName, sizeof(b.customerName), file)) break;
-        b.customerName[strcspn(b.customerName, "\n")] = '\0';
+    while (fgets(line, sizeof(line), file)) {
+        int bId;
+        char cust[50], ven[50], dt[15], slt[20];
+        double prc;
 
-        if (!fgets(b.gameName, sizeof(b.gameName), file)) break;
-        b.gameName[strcspn(b.gameName, "\n")] = '\0';
-
-        if (!fgets(b.timeSlot, sizeof(b.timeSlot), file)) break;
-        b.timeSlot[strcspn(b.timeSlot, "\n")] = '\0';
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.hours = atoi(buffer);
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.totalBill = atof(buffer);
-
-        printf("ID: #%05d | Slot: [%s] | Game: %s | Booked By: %s | Total: $%.2lf\n",
-               b.bookingId, b.timeSlot, b.gameName, b.customerName, b.totalBill);
-    }
-    fclose(file);
-}
-
-void viewMembers() {
-    FILE *file = fopen("bookings.txt", "r");
-    if (!file) {
-        printf("\nNo one has booked/confirmed anything yet.\n");
-        return;
-    }
-
-    struct Booking b;
-    char buffer[50];
-    int count = 0;
-
-    printf("\n--- Members Who Confirmed a Booking ---\n");
-
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        b.bookingId = atoi(buffer);
-
-        if (!fgets(b.customerName, sizeof(b.customerName), file)) break;
-        b.customerName[strcspn(b.customerName, "\n")] = '\0';
-
-        if (!fgets(b.gameName, sizeof(b.gameName), file)) break;
-        b.gameName[strcspn(b.gameName, "\n")] = '\0';
-
-        if (!fgets(b.timeSlot, sizeof(b.timeSlot), file)) break;
-        b.timeSlot[strcspn(b.timeSlot, "\n")] = '\0';
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.hours = atoi(buffer);
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.totalBill = atof(buffer);
-
-        count++;
-        printf("%d. %s  (Game: %s, Slot: %s, Booking ID: #%05d)\n",
-               count, b.customerName, b.gameName, b.timeSlot, b.bookingId);
-    }
-    fclose(file);
-
-    if (count == 0) printf("No confirmed members found.\n");
-    printf("----------------------------------------\n");
-    printf("Total Confirmed Members: %d\n", count);
-}
-
-void cancelbooking() {
-    int targetId;
-    printf("Enter Booking ID to cancel: ");
-    if (scanf("%d", &targetId) != 1) {
-        printf("Invalid ID format.\n");
-        while (getchar() != '\n');
-        return;
-    }
-    while (getchar() != '\n');
-
-    FILE *file = fopen("bookings.txt", "r");
-    if (!file) {
-        printf("No bookings data found.\n");
-        return;
-    }
-    FILE *tempFile = fopen("temp.txt", "w");
-    if (!tempFile) {
-        fclose(file);
-        printf("Error creating temporary file.\n");
-        return;
-    }
-
-    struct Booking b;
-    char buffer[50];
-    int deleted = 0;
-
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        b.bookingId = atoi(buffer);
-
-        if (!fgets(b.customerName, sizeof(b.customerName), file)) break;
-        b.customerName[strcspn(b.customerName, "\n")] = '\0';
-
-        if (!fgets(b.gameName, sizeof(b.gameName), file)) break;
-        b.gameName[strcspn(b.gameName, "\n")] = '\0';
-
-        if (!fgets(b.timeSlot, sizeof(b.timeSlot), file)) break;
-        b.timeSlot[strcspn(b.timeSlot, "\n")] = '\0';
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.hours = atoi(buffer);
-
-        if (!fgets(buffer, sizeof(buffer), file)) break;
-        b.totalBill = atof(buffer);
-
-        if (b.bookingId == targetId && !deleted) {
-            deleted = 1;
-            continue;
+        if (sscanf(line, "%d,%49[^,],%49[^,],%14[^,],%19[^,],%lf", &bId, cust, ven, dt, slt, &prc) == 6) {
+            if (strcasecmp(ven, venueName) == 0 && strcmp(dt, date) == 0) {
+                printf("  [Occupied] Time: %-18s | Booked By: %s\n", slt, cust);
+                found = 1;
+            }
         }
-        fprintf(tempFile, "%d\n%s\n%s\n%s\n%d\n%.2lf\n",
-                b.bookingId, b.customerName, b.gameName,
-                b.timeSlot, b.hours, b.totalBill);
     }
     fclose(file);
-    fclose(tempFile);
 
-    remove("bookings.txt");
-    rename("temp.txt", "bookings.txt");
-
-    if (deleted)
-        printf("Booking #%05d has been canceled successfully.\n", targetId);
-    else
-        printf("No matching Booking ID found.\n");
+    if (!found) {
+        printf("  (No slots booked yet for this date. All times available!)\n");
+    }
+    printf("---------------------------------------------------\n");
 }
 
-void viewNoticeBoard() {
-    FILE *file = fopen("notice.txt", "r");
-    printf("\n==================================================\n");
-    printf("     📢 COMPLEX NOTICE BOARD & REGULATIONS       \n");
-    printf("==================================================\n");
+// Slot booking workflow showing existing schedule first
+void bookSlot(struct VenueNode* root) {
+    char targetVenue[50], customer[50], date[15], slot[20];
 
-    if (!file) {
-        printf(" 1. Non-marking sports shoes are strictly required.\n");
-        printf(" 2. Please arrive 10 minutes prior to your slot.\n");
-        printf(" 3. Cancellations must be made via Booking ID.\n");
-        printf(" 4. Equipment damage charges apply to offenders.\n");
-        printf(" 5. Respect staff and fellow players at all times.\n");
-        printf("==================================================\n");
+    printf("\n--- BST Venue Search ---\nEnter Venue Name: ");
+    fgets(targetVenue, sizeof(targetVenue), stdin);
+    targetVenue[strcspn(targetVenue, "\n")] = '\0';
+
+    struct VenueNode* venue = searchVenueBST(root, targetVenue);
+    if (!venue) {
+        printf("Error: Venue '%s' not found in BST registry!\n", targetVenue);
         return;
     }
 
-    char line[100];
-    while (fgets(line, sizeof(line), file) != NULL) {
-        printf("%s", line);
+    printf("Venue Found! Enter Date (DD-MM-YYYY): ");
+    fgets(date, sizeof(date), stdin);
+    date[strcspn(date, "\n")] = '\0';
+
+    // Show currently booked schedule for this specific venue & date
+    showBookedSlots(venue->name, date);
+
+    printf("Enter Customer Name: ");
+    fgets(customer, sizeof(customer), stdin);
+    customer[strcspn(customer, "\n")] = '\0';
+
+    printf("Enter Available Slot (e.g. 04:00PM-05:00PM): ");
+    fgets(slot, sizeof(slot), stdin);
+    slot[strcspn(slot, "\n")] = '\0';
+
+    int bookingId = rand() % 9000 + 1000;
+
+    FILE *file = fopen("bookings.txt", "a");
+    if (file) {
+        fprintf(file, "%d,%s,%s,%s,%s,%.2f\n", bookingId, customer, venue->name, date, slot, venue->price);
+        fclose(file);
+        printf("\nPayment Successful! Booked '%s' for %s [%s]. Booking ID: %d\n",
+               venue->name, date, slot, bookingId);
     }
-    printf("==================================================\n");
-    fclose(file);
 }
 
-void updateNoticeBoard() {
-    FILE *file = fopen("notice.txt", "w");
-    if (!file) {
-        printf("Error writing notice board.\n");
+void changeBookingDate() {
+    int targetId, updated = 0;
+    char newDate[15], line[200];
+    
+    printf("\n--- Change Booking Date ---\nEnter Booking ID: ");
+    if (scanf("%d", &targetId) != 1) return;
+    while (getchar() != '\n');
+    
+    printf("Enter New Date (DD-MM-YYYY): ");
+    fgets(newDate, sizeof(newDate), stdin);
+    newDate[strcspn(newDate, "\n")] = '\0';
+
+    FILE *file = fopen("bookings.txt", "r");
+    FILE *temp = fopen("temp_bookings.txt", "w");
+    if (!file || !temp) {
+        if (file) fclose(file);
+        if (temp) fclose(temp);
         return;
     }
 
-    char noticeText[200];
-    printf("Enter new announcement for the Notice Board:\n> ");
-    fgets(noticeText, sizeof(noticeText), stdin);
+    while (fgets(line, sizeof(line), file)) {
+        int bId; char cust[50], ven[50], dt[15], slt[20]; double prc;
+        if (sscanf(line, "%d,%49[^,],%49[^,],%14[^,],%19[^,],%lf", &bId, cust, ven, dt, slt, &prc) == 6) {
+            if (bId == targetId) {
+                strcpy(dt, newDate);
+                updated = 1;
+            }
+            fprintf(temp, "%d,%s,%s,%s,%s,%.2f\n", bId, cust, ven, dt, slt, prc);
+        }
+    }
+    fclose(file); 
+    fclose(temp);
+    remove("bookings.txt"); 
+    rename("temp_bookings.txt", "bookings.txt");
 
-    fprintf(file, "📢 ANNOUNCEMENT: %s", noticeText);
-    fprintf(file, "\n--- STANDARD COMPLEX RULES ---\n");
-    fprintf(file, "1. Non-marking shoes required on court.\n");
-    fprintf(file, "2. Arrive 10 minutes before slot start time.\n");
-    fprintf(file, "3. Maintain sportsmanship and safety.\n");
-
-    fclose(file);
-    printf("✅ Notice board updated successfully!\n");
+    if (updated) {
+        printf("Date updated successfully to %s for Booking ID %d\n", newDate, targetId);
+    } else {
+        printf("Error: Booking ID %d not found.\n", targetId);
+    }
 }
