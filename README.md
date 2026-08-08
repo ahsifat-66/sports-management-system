@@ -198,43 +198,31 @@ Worst case for a highly unbalanced BST:
 
 Worst Case → O(n)
 
-🏟️ Default Venues
+🏟️ Venue Registration
 
-The system starts with three default venues:
+The system starts with an empty Binary Search Tree—no default venues are preloaded.
 
-🏟️ Venue
+Venues are added later through:
+
+Venue Provider Portal
+        ↓
+Add / Register New Venue
+        ↓
+BST Insertion
+        ↓
+Venue becomes available for Customers
+
+Venue Providers can dynamically register new venues with:
+
+🆔 Venue ID
+
+🏟️ Venue Name
 
 📍 Area
 
-⚽ Sport
+⚽ Sport Type
 
-💰 Rate
-
-Daffodil Futsal
-
-Ashulia
-
-Football
-
-1200.00/hr
-
-DIU Indoor
-
-Ashulia
-
-Badminton
-
-500.00/hr
-
-Mirpur Arena
-
-Mirpur
-
-Cricket
-
-2000.00/hr
-
-Venue Providers can dynamically register additional venues.
+💰 Price Per Hour
 
 🔑 Authentication & Security
 
@@ -478,7 +466,7 @@ Md Abid Hasan Sifat
 
 🔐 Security & Authentication Specialist
 
-Authentication workflows, password hashing, Admin/Provider/Customer Sign Up & Login, credential file storage, and Admin game pricing management
+compute_md5(), Admin/Provider/Customer authentication, Sign Up & Login, password hashing, providers.txt, customers.txt, and Admin game pricing management
 
 Md Rakib Hossain
 
@@ -486,7 +474,7 @@ Md Rakib Hossain
 
 🌳 Data Structures & BST Engine Specialist
 
-struct VenueNode, dynamic memory allocation, alphabetical BST insertion, venue search, and recursive in-order traversal
+struct VenueNode, dynamic memory allocation, alphabetical venue insertion using insertVenue(), BST search using searchVenueBST(), and recursive in-order traversal using displayVenuesBST()
 
 Md Thowhidul Mehraj
 
@@ -494,7 +482,33 @@ Md Thowhidul Mehraj
 
 📅 Schedule, Booking & File Systems Specialist
 
-Schedule visualization, slot booking, Booking ID generation, payment recording, and booking-date modification using temporary-file replacement
+showBookedSlots(), bookSlot(), Booking ID generation, payment recording, bookings.txt management, and booking-date modification using changeBookingDate()
+
+📌 Contribution Summary
+
+Contributor
+
+ID
+
+Contribution
+
+🔐 Md Abid Hasan Sifat
+
+252-35-135
+
+Security, Authentication & Admin Game Management
+
+🌳 Md Rakib Hossain
+
+252-35-251
+
+BST, Venue Management & Search Engine
+
+📅 Md Thowhidul Mehraj
+
+252-35-256
+
+Schedule, Booking & File Management
 
 🔐 Contributor 1 — Md Abid Hasan Sifat
 
@@ -679,11 +693,7 @@ It provides hands-on experience in combining data structures, algorithms, securi
 
 💙 Developed by
 
-Md Abid Hasan Sifat252-35-135
-
-Md Rakib Hossain252-35-251
-
-Md Thowhidul Mehraj252-35-256
+🔐 Md Abid Hasan Sifat — 252-35-135🌳 Md Rakib Hossain — 252-35-251📅 Md Thowhidul Mehraj — 252-35-256
 
 🏟️ Daffodil Sports Management System
 
